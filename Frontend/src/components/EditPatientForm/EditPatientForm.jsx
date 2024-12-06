@@ -1,58 +1,43 @@
-//import React from 'react';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { usePatients } from "../../hooks/usePatients";
 
-//const EditPatientForm = ({ editPatient, onEditPatient, onCancelEdit }) => {
-//    const handleInputChange = (e) => {
-//        const { name, value } = e.target;
-//        onEditPatient({ ...editPatient, [name]: value });
-//    };
+const EditPatientForm = () => {
+    const { id } = useParams();
+    const { patients, updatePatient } = usePatients();
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState(null);
 
-//    const handleSubmit = (e) => {
-//        e.preventDefault();
-//        onEditPatient(editPatient);
-//    };
+    useEffect(() => {
+        const patient = patients.find((p) => p.id === parseInt(id));
+        if (patient) setFormData(patient);
+    }, [id, patients]);
 
-//    return (
-//        <form onSubmit={handleSubmit}>
-//            <input
-//                type="text"
-//                name="firstName"
-//                value={editPatient.firstName}
-//                onChange={handleInputChange}
-//            />
-//            <input
-//                type="text"
-//                name="lastName"
-//                value={editPatient.lastName}
-//                onChange={handleInputChange}
-//            />
-//            <input
-//                type="date"
-//                name="dateOfBirth"
-//                value={editPatient.dateOfBirth}
-//                onChange={handleInputChange}
-//            />
-//            <input
-//                type="text"
-//                name="gender"
-//                value={editPatient.gender}
-//                onChange={handleInputChange}
-//            />
-//            <input
-//                type="text"
-//                name="address"
-//                value={editPatient.address}
-//                onChange={handleInputChange}
-//            />
-//            <input
-//                type="text"
-//                name="phoneNumber"
-//                value={editPatient.phoneNumber}
-//                onChange={handleInputChange}
-//            />
-//            <button type="submit">Mettre à jour</button>
-//            <button type="button" onClick={onCancelEdit}>Annuler</button>
-//        </form>
-//    );
-//};
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
 
-//export default EditPatientForm;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        await updatePatient(id, formData);
+        navigate("/"); // Retour à la liste des patients
+    };
+
+    if (!formData) return <p>Loading patient details...</p>;
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <h2>Modifier un patient</h2>
+            <input name="firstName" value={formData.firstName} onChange={handleInputChange} />
+            <input name="lastName" value={formData.lastName} onChange={handleInputChange} />
+            <input name="dateOfBirth" type="date" value={formData.dateOfBirth} onChange={handleInputChange} />
+            <input name="gender" value={formData.gender} onChange={handleInputChange} />
+            <input name="address" value={formData.address} onChange={handleInputChange} />
+            <input name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
+            <button type="submit">Mettre à jour</button>
+        </form>
+    );
+};
+
+export default EditPatientForm;
