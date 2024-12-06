@@ -1,15 +1,31 @@
-namespace Gateway
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Charger le fichier ocelot.json
+builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+
+// Ajouter CORS
+builder.Services.AddCors(options =>
 {
-    public class Program
+    options.AddPolicy("AllowAll", policy =>
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
-            var app = builder.Build();
+        policy.WithOrigins("http://localhost:5173") // Remplace par l'URL de ton frontend
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
-            app.MapGet("/", () => "Hello World!");
+// Ajouter Ocelot
+builder.Services.AddOcelot();
 
-            app.Run();
-        }
-    }
-}
+var app = builder.Build();
+
+// Utiliser CORS
+app.UseCors("AllowAll");
+
+// Utiliser Ocelot comme middleware
+await app.UseOcelot();
+
+app.Run();

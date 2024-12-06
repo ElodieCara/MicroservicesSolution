@@ -13,28 +13,40 @@ namespace PatientService.Api
             builder.Services.AddDbContext<PatientDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            // Ajouter CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173") // Remplace par l'URL de ton frontend
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
             // Ajouter les services nécessaires
-            builder.Services.AddControllers(); // Pour les API Controllers
-            builder.Services.AddEndpointsApiExplorer(); // Pour Swagger
-            builder.Services.AddSwaggerGen(); // Documentation API
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            // Utiliser CORS
+            app.UseCors("AllowAll");
 
             // Configure le pipeline HTTP
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger(); // Génération Swagger uniquement en dev
-                app.UseSwaggerUI(); // Interface Swagger
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
-            // Redirige la page d'accueil vers Swagger
             app.MapGet("/", () => Results.Redirect("/swagger"));
-
-            app.MapControllers(); // Mappe les routes API
+            app.MapControllers();
 
             app.Run();
         }
