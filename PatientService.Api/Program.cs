@@ -10,6 +10,11 @@ namespace PatientService.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Vérifier les paramètres JWT chargés
+            Console.WriteLine($"Chargement des paramètres : Jwt:Key = {builder.Configuration["Jwt:Key"]}");
+            Console.WriteLine($"Chargement des paramètres : Jwt:Issuer = {builder.Configuration["Jwt:Issuer"]}");
+            Console.WriteLine($"Chargement des paramètres : Jwt:Audience = {builder.Configuration["Jwt:Audience"]}");
+
             // Configurer Entity Framework avec SQL Server
             builder.Services.AddDbContext<PatientDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
