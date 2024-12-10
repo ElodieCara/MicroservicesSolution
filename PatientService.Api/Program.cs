@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PatientService.Api.Data;
 
@@ -24,6 +25,11 @@ namespace PatientService.Api
                 });
             });
 
+            // Ajouter les services Identity (si requis pour ton API)
+            builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<PatientDbContext>()
+                .AddDefaultTokenProviders();
+
             // Ajouter les services nécessaires
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -43,8 +49,11 @@ namespace PatientService.Api
 
             app.UseHttpsRedirection();
 
+            // Authentification et Autorisation
+            app.UseAuthentication();
             app.UseAuthorization();
 
+            // Map Swagger et les routes API
             app.MapGet("/", () => Results.Redirect("/swagger"));
             app.MapControllers();
 
