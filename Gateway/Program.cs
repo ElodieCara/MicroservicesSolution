@@ -25,12 +25,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Ajouter CORS
+// Ajouter CORS pour permettre les requêtes du frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173") // URL du frontend
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -41,11 +41,14 @@ builder.Services.AddOcelot();
 
 var app = builder.Build();
 
+// Activer CORS
 app.UseCors("AllowAll");
 
+// Activer l'authentification et l'autorisation
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Configurer Ocelot
 await app.UseOcelot();
 
 app.Run();

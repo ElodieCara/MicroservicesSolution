@@ -1,7 +1,7 @@
 {
     "Routes": [
         {
-            "DownstreamPathTemplate": "/api/{everything}",
+            "DownstreamPathTemplate": "/api/Patient/{everything}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
                 {
@@ -9,7 +9,19 @@
                     "Port": 44364
                 }
             ],
-            "UpstreamPathTemplate": "/api/{everything}",
+            "UpstreamPathTemplate": "/api/patient/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/Notes/{everything}",
+            "DownstreamScheme": "https",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 44337
+                }
+            ],
+            "UpstreamPathTemplate": "/api/notes/{everything}",
             "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
         }
     ],
