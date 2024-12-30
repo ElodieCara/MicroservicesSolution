@@ -1,31 +1,51 @@
 {
     "Routes": [
         {
-            "DownstreamPathTemplate": "/api/Patient/{everything}",
-            "DownstreamScheme": "https",
+            "UpstreamPathTemplate": "/api/patient/{everything}",
+            "DownstreamPathTemplate": "/api/{everything}",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 44364
+                    "Host": "patientservice",
+                    "Port": 80
                 }
             ],
-            "UpstreamPathTemplate": "/api/patient/{everything}",
-            "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+            "DownstreamScheme": "http",
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer",
+                "AllowedScopes": []
+            },
+            "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
         },
         {
-            "DownstreamPathTemplate": "/api/Notes/{everything}",
-            "DownstreamScheme": "https",
+            "UpstreamPathTemplate": "/api/auth/login",
+            "DownstreamPathTemplate": "/api/auth/login",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 44337
+                    "Host": "patientservice",
+                    "Port": 80
                 }
             ],
+            "DownstreamScheme": "http",
+            "UpstreamHttpMethod": [ "Post" ]
+        },
+        {
             "UpstreamPathTemplate": "/api/notes/{everything}",
-            "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+            "DownstreamPathTemplate": "/api/{everything}",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "notesservice",
+                    "Port": 80
+                }
+            ],
+            "DownstreamScheme": "http",
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer",
+                "AllowedScopes": []
+            },
+            "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
         }
     ],
     "GlobalConfiguration": {
-        "BaseUrl": "https://localhost:7124"
+        "BaseUrl": "http://localhost:7000"
     }
 }

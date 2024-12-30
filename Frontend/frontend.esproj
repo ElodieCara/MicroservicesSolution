@@ -10,7 +10,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="src\components\EditPatientForm\" />
+    <Folder Include="src\components\Auth\" />
+    <Folder Include="src\components\ProtectedRoute\" />
     <Folder Include="src\components\PatientDetail\" />
     <Folder Include="src\components\PatientList\" />
+    <Folder Include="src\utils\" />
   </ItemGroup>
 </Project>

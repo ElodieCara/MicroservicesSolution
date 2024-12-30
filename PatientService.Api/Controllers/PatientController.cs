@@ -1,63 +1,58 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PatientService.Api.Data;
 using PatientService.Api.Models;
+using PatientService.Api.Services;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PatientService.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PatientController : ControllerBase
+    public class PatientsController : ControllerBase
     {
-        private readonly PatientDbContext _context;
+        private readonly IPatientService _patientService;
 
-        public PatientController(PatientDbContext context)
+        public PatientsController(IPatientService patientService)
         {
-            _context = context;
+            _patientService = patientService;
         }
 
         [HttpGet]
-        public IActionResult GetAll() => Ok(_context.Patients.ToList());
+        public async Task<ActionResult<IEnumerable<Patient>>> GetAllPatients()
+        {
+            var patients = await _patientService.GetAllPatientsAsync();
+            return Ok(patients);
+        }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<ActionResult<Patient>> GetPatientById(int id)
         {
-            var patient = _context.Patients.Find(id);
-            return patient == null ? NotFound() : Ok(patient);
+            var patient = await _patientService.GetPatientByIdAsync(id);
+            if (patient == null)
+            {
+                return NotFound();
+            }
+            return Ok(patient);
         }
 
         [HttpPost]
-        public IActionResult Create(Patient patient)
+        public async Task<ActionResult> CreatePatient([FromBody] Patient patient)
         {
-            _context.Patients.Add(patient);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = patient.Id }, patient);
+            await _patientService.CreatePatientAsync(patient);
+            return CreatedAtAction(nameof(GetPatientById), new { id = patient.Id }, patient);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Patient updatedPatient)
+        public async Task<ActionResult> UpdatePatient(int id, [FromBody] Patient updatedPatient)
         {
-            var patient = _context.Patients.Find(id);
-            if (patient == null) return NotFound();
-
-            patient.FirstName = updatedPatient.FirstName;
-            patient.LastName = updatedPatient.LastName;
-            patient.DateOfBirth = updatedPatient.DateOfBirth;
-            patient.Gender = updatedPatient.Gender;
-            patient.Address = updatedPatient.Address;
-            patient.PhoneNumber = updatedPatient.PhoneNumber;
-
-            _context.SaveChanges();
+            await _patientService.UpdatePatientAsync(id, updatedPatient);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<ActionResult> DeletePatient(int id)
         {
-            var patient = _context.Patients.Find(id);
-            if (patient == null) return NotFound();
-
-            _context.Patients.Remove(patient);
-            _context.SaveChanges();
+            await _patientService.DeletePatientAsync(id);
             return NoContent();
         }
     }

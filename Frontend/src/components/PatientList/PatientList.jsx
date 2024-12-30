@@ -14,15 +14,12 @@ const PatientList = () => {
             <ul>
                 {patients.map((patient) => (
                     <li key={patient.id}>
-                        {/* Lien pour voir les détails du patient */}
                         <Link to={`/patient/${patient.id}`} style={{ marginRight: "10px" }}>
                             {patient.firstName} {patient.lastName}
                         </Link>
-                        {/* Lien pour modifier le patient */}
                         <Link to={`/edit-patient/${patient.id}`} style={{ marginRight: "10px" }}>
                             Modifier
                         </Link>
-                        {/* Bouton pour supprimer le patient */}
                         <button onClick={() => deletePatient(patient.id)}>Supprimer</button>
                     </li>
                 ))}

@@ -1,28 +1,127 @@
-version: "3.9"
+#version: "3.9"
+
 services:
-  backend:
+  ################################################################
+  # PATIENT SERVICE
+  ################################################################
+  patientservice:
     build:
       context: ./PatientService.Api
       dockerfile: Dockerfile
+    container_name: patientservice
     ports:
-      - "5000:80"
+      - "5001:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PatientDB;User Id=sa;Password=MySecureP@ssw0rd123!;Encrypt=True;TrustServerCertificate=True
+      - Jwt__Key=BUG}nL?ds&)ZX/Se*:]$'vVK8[5TA6uM
+      - Jwt__Issuer=PatientService
+      - Jwt__Audience=PatientServiceUsers
+    volumes:
+      - ./PatientService.Api/appsettings.Development.json:/app/appsettings.Development.json
+    depends_on:
+      - sqlserver
+    networks:
+      - reseau
 
+  ################################################################
+  # NOTES SERVICE
+  ################################################################
+  notesservice:
+    build:
+      context: ./NotesService.Api
+      dockerfile: Dockerfile
+    container_name: notesservice
+    ports:
+      - "5003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MongoDbSettings__ConnectionString=mongodb://mongodb:27017
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PatientDB;User Id=sa;Password=MySecureP@ssw0rd123!;Encrypt=True;TrustServerCertificate=True
+      - Jwt__Key=BUG}nL?ds&)ZX/Se*:]$'vVK8[5TA6uM
+      - Jwt__Issuer=NotesService
+      - Jwt__Audience=NotesServiceUsers
+    volumes:
+      - ./NotesService.Api/appsettings.Development.json:/app/appsettings.Development.json
+    depends_on:
+      - mongodb
+    networks:
+      - reseau
+
+  ################################################################
+  # GATEWAY
+  ################################################################
   gateway:
     build:
       context: ./Gateway
       dockerfile: Dockerfile
+    container_name: gateway
     ports:
       - "7000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Key=BUG}nL?ds&)ZX/Se*:]$'vVK8[5TA6uM
+      - Jwt__Issuer=GatewayService
+      - Jwt__Audience=GatewayUsers
     depends_on:
-      - backend
+      - patientservice
+      - notesservice
+    networks:
+      - reseau
 
+  ################################################################
+  # FRONTEND
+  ################################################################
   frontend:
     build:
       context: ./Frontend
       dockerfile: Dockerfile
+    container_name: frontend
     ports:
       - "5173:80"
     depends_on:
       - gateway
+    networks:
+      - reseau
+
+  ################################################################
+  # SQL SERVER
+  ################################################################
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      - SA_PASSWORD=MySecureP@ssw0rd123!
+      - ACCEPT_EULA=Y
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    #healthcheck:
+    # test: ["CMD", "bash", "-c", "echo > /dev/tcp/sqlserver/1433"]      
+    # interval: 10s
+     # timeout: 5s
+     # retries: 10
+    networks:
+      - reseau
+
+  ################################################################
+  # MONGODB
+  ################################################################
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - reseau
+
+networks:
+  reseau:
+    driver: bridge
+
+volumes:
+  sql_data:
+  mongodb_data:

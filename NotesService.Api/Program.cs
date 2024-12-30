@@ -1,8 +1,11 @@
 using MongoDB.Driver;
 using NotesService.Api.Data;
 using NotesService.Api.Models;
-using Microsoft.Extensions.Options;
 using NotesService.Api.Services;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace NotesService.Api
 {
@@ -10,31 +13,49 @@ namespace NotesService.Api
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(args);            
 
-            // Configure MongoDB settings from appsettings.json
+            // Configure MongoDB settings and services
             builder.Services.Configure<MongoDbSettings>(
                 builder.Configuration.GetSection("MongoDbSettings"));
 
-            // Add MongoClient as a singleton
             builder.Services.AddSingleton<IMongoClient>(sp =>
             {
                 var mongoDbSettings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
                 return new MongoClient(mongoDbSettings.ConnectionString);
             });
 
-            // Add MongoDbService as a singleton
             builder.Services.AddSingleton<MongoDbService>();
-
-            // Add NotesManagementService as a singleton
             builder.Services.AddSingleton<NotesManagementService>();
 
-            // Ajout de la configuration CORS
+            // JWT configuration
+            var key = builder.Configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new Exception("La clé JWT n'est pas configurée dans appsettings.json.");
+            }
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                    };
+                });
+
+            // CORS configuration
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowReactApp", policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173") 
+                    policy.WithOrigins("http://localhost:5173")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -47,22 +68,25 @@ namespace NotesService.Api
 
             var app = builder.Build();
 
-            // Activez CORS dans le pipeline HTTP
+            // Enable CORS
             app.UseCors("AllowReactApp");
 
-            // Configure the HTTP request pipeline
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            // Configure Swagger
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            app.MapGet("/", () => Results.Redirect("/swagger"));
 
-            app.UseAuthorization();
-
+            // Map controllers
             app.MapControllers();
 
+            // Run the application
             app.Run();
         }
     }

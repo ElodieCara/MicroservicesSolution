@@ -1,8 +1,11 @@
+// src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./components/Auth/Login";
 import PatientList from "./components/PatientList/PatientList";
 import AddPatientForm from "./components/AddPatientForm/AddPatientForm";
 import EditPatientForm from "./components/EditPatientForm/EditPatientForm";
 import PatientDetail from "./components/PatientDetail/PatientDetail";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
 const App = () => {
     return (
@@ -10,17 +13,43 @@ const App = () => {
             <div>
                 <h1>Patient Management System</h1>
                 <Routes>
-                    {/* Route pour afficher la liste des patients */}
-                    <Route path="/" element={<PatientList />} />
+                    <Route path="/login" element={<Login />} />
 
-                    {/* Route pour ajouter un patient */}
-                    <Route path="/add-patient" element={<AddPatientForm />} />
+                    <Route
+                        path="/"
+                        element={
+                            <ProtectedRoute>
+                                <PatientList />
+                            </ProtectedRoute>
+                        }
+                    />
 
-                    {/* Route pour modifier un patient */}
-                    <Route path="/edit-patient/:id" element={<EditPatientForm />} />
+                    <Route
+                        path="/add-patient"
+                        element={
+                            <ProtectedRoute>
+                                <AddPatientForm />
+                            </ProtectedRoute>
+                        }
+                    />
 
-                    <Route path="/patient/:id" element={<PatientDetail />} />
+                    <Route
+                        path="/edit-patient/:id"
+                        element={
+                            <ProtectedRoute>
+                                <EditPatientForm />
+                            </ProtectedRoute>
+                        }
+                    />
 
+                    <Route
+                        path="/patient/:id"
+                        element={
+                            <ProtectedRoute>
+                                <PatientDetail />
+                            </ProtectedRoute>
+                        }
+                    />
                 </Routes>
             </div>
         </Router>

@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace PatientService.Api.Controllers
+namespace NotesService.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -38,32 +37,15 @@ namespace PatientService.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var user = await _userManager.FindByNameAsync(model.Username);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                return Unauthorized("Nom d'utilisateur ou mot de passe incorrect.");
+                return Unauthorized("Invalid username or password.");
             }
 
             var token = GenerateJwtToken(user);
             return Ok(new { Token = token });
-        }
-
-        [HttpGet("users")]
-        [Authorize(Roles = "Admin")] // Accessible uniquement aux administrateurs
-        public IActionResult GetAllUsers()
-        {
-            var users = _userManager.Users.Select(user => new
-            {
-                user.Id,
-                user.UserName,
-                user.Email
-            }).ToList();
-
-            return Ok(users);
         }
 
         private string GenerateJwtToken(IdentityUser user)
@@ -97,7 +79,7 @@ namespace PatientService.Api.Controllers
 
     public class LoginModel
     {
-        public  required string Username { get; set; }
-        public  required string Password { get; set; }
+        public required string Username { get; set; }
+        public required string Password { get; set; }
     }
 }

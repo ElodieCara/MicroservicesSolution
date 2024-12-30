@@ -8,19 +8,24 @@ const PatientDetail = () => {
     const { patients } = usePatients(); // Utilise les patients depuis le hook
     const [notes, setNotes] = useState([]);
     const [newNote, setNewNote] = useState("");
+    const token = localStorage.getItem("jwt");
 
     const patient = patients.find((p) => p.id === parseInt(id));
 
      useEffect(() => {
         if (patient) {
-            axios.get(`https://localhost:44336/api/Notes/patient/${patient.id}`)
+            axios.get(`http://localhost:7000/api/notes/patient/${patient.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Inclure le token
+                },
+            })
                 .then((response) => {
                     console.log("Notes récupérées :", response.data); // Ajoutez ce log
                     setNotes(response.data)
                 })
                 .catch((error) => console.error("Erreur lors du chargement des notes:", error));
         }
-    }, [patient]);
+    }, [patient, token]);
 
     const addNote = () => {
         const note = {
@@ -29,7 +34,11 @@ const PatientDetail = () => {
             NoteContent: newNote,
         };
 
-        axios.post("https://localhost:44336/api/Notes", note)
+        axios.post("http://localhost:7000/api/notes", note, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Inclure le token
+            },
+        })
             .then((response) => {
                 setNotes([...notes, response.data]);
                 setNewNote("");
