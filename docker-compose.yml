@@ -1,4 +1,4 @@
-#version: "3.9"
+version: "3.9"
 
 services:
   ################################################################
@@ -10,15 +10,16 @@ services:
       dockerfile: Dockerfile
     container_name: patientservice
     ports:
-      - "5001:80"
+      - "5050:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PatientDB;User Id=sa;Password=MySecureP@ssw0rd123!;Encrypt=True;TrustServerCertificate=True
       - Jwt__Key=BUG}nL?ds&)ZX/Se*:]$'vVK8[5TA6uM
       - Jwt__Issuer=PatientService
       - Jwt__Audience=PatientServiceUsers
+      - ASPNETCORE_URLS=http://+:80
     volumes:
-      - ./PatientService.Api/appsettings.Development.json:/app/appsettings.Development.json
+      - ./PatientService.Api/appsettings.Development.json:/app/appsettings.Development.json      
     depends_on:
       - sqlserver
     networks:
@@ -33,14 +34,12 @@ services:
       dockerfile: Dockerfile
     container_name: notesservice
     ports:
-      - "5003:80"
+      - "8085:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoDbSettings__ConnectionString=mongodb://mongodb:27017
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PatientDB;User Id=sa;Password=MySecureP@ssw0rd123!;Encrypt=True;TrustServerCertificate=True
-      - Jwt__Key=BUG}nL?ds&)ZX/Se*:]$'vVK8[5TA6uM
-      - Jwt__Issuer=NotesService
-      - Jwt__Audience=NotesServiceUsers
+      - MongoDbSettings__DatabaseName=NoteDB
+      - ASPNETCORE_URLS=http://+:8080
     volumes:
       - ./NotesService.Api/appsettings.Development.json:/app/appsettings.Development.json
     depends_on:
@@ -57,12 +56,12 @@ services:
       dockerfile: Dockerfile
     container_name: gateway
     ports:
-      - "7000:80"
+      - "5100:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - Jwt__Key=BUG}nL?ds&)ZX/Se*:]$'vVK8[5TA6uM
-      - Jwt__Issuer=GatewayService
-      - Jwt__Audience=GatewayUsers
+      - ASPNETCORE_URLS=http://+:80
+      #- PATIENT_SERVICE_URL=http://patientservice:80
+      #- NOTES_SERVICE_URL=http://notesservice:8080
     depends_on:
       - patientservice
       - notesservice
@@ -97,11 +96,12 @@ services:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
+      - ./keys:/root/.aspnet/DataProtection-Keys 
     #healthcheck:
-    # test: ["CMD", "bash", "-c", "echo > /dev/tcp/sqlserver/1433"]      
-    # interval: 10s
-     # timeout: 5s
-     # retries: 10
+     ## test: ["CMD-SHELL", "sqlcmd -U sa -P MySecureP@ssw0rd123! -Q 'SELECT 1'"]
+     # interval: 10s
+      ##timeout: 5s
+     # retries: 5
     networks:
       - reseau
 

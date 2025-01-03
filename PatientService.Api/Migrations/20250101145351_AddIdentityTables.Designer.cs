@@ -12,7 +12,7 @@ using PatientService.Api.Data;
 namespace PatientService.Api.Migrations
 {
     [DbContext(typeof(PatientDbContext))]
-    [Migration("20241210090528_AddIdentityTables")]
+    [Migration("20250101145351_AddIdentityTables")]
     partial class AddIdentityTables
     {
         /// <inheritdoc />

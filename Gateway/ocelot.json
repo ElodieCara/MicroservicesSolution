@@ -1,8 +1,8 @@
 {
     "Routes": [
         {
-            "UpstreamPathTemplate": "/api/patient/{everything}",
-            "DownstreamPathTemplate": "/api/{everything}",
+            "UpstreamPathTemplate": "/api/patients/{everything}",
+            "DownstreamPathTemplate": "/api/patients/{everything}",
             "DownstreamHostAndPorts": [
                 {
                     "Host": "patientservice",
@@ -30,22 +30,19 @@
         },
         {
             "UpstreamPathTemplate": "/api/notes/{everything}",
-            "DownstreamPathTemplate": "/api/{everything}",
+
+            "DownstreamPathTemplate": "/api/notes/{everything}",
             "DownstreamHostAndPorts": [
                 {
                     "Host": "notesservice",
-                    "Port": 80
+                    "Port": 8080
                 }
             ],
-            "DownstreamScheme": "http",
-            "AuthenticationOptions": {
-                "AuthenticationProviderKey": "Bearer",
-                "AllowedScopes": []
-            },
+            "DownstreamScheme": "http",            
             "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
         }
     ],
     "GlobalConfiguration": {
-        "BaseUrl": "http://localhost:7000"
+        "BaseUrl": "http://localhost:5100"
     }
 }

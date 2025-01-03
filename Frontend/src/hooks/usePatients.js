@@ -5,7 +5,7 @@ export const usePatients = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const apiUrl = "http://localhost:7000/api/patient"; // URL de l'API Gateway
+    const apiUrl = "http://localhost:5100/api/patients"; // URL de l'API Gateway
 
     const fetchPatients = useCallback(async () => {
         const token = localStorage.getItem("jwt"); // Récupérer le token à chaque appel
@@ -20,13 +20,17 @@ export const usePatients = () => {
                 },
             });
 
+            console.log("Response status:", response.status);
+
             if (!response.ok) {
                 throw new Error(`Failed to fetch patients: ${response.statusText}`);
             }
 
             const data = await response.json();
+            console.log("Patients fetched:", data);
             setPatients(data);
         } catch (err) {
+            console.error("Error fetching patients:", err.message);
             setError(err.message);
         } finally {
             setLoading(false);
